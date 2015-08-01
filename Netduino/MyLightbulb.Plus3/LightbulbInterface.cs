@@ -26,8 +26,7 @@ namespace MyLightbulb.Plus3
 
         private void StartServer()
         {
-            using (Socket servidor =
-new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            using (Socket servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
 
             }

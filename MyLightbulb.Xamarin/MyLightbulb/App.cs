@@ -11,17 +11,40 @@ namespace MyLightbulb
     {
         public App()
         {
-            // The root page of your application
+
+            //var lightSwitch = new Button { Text = "On / Off" };
+            var lightSwitch = new Switch { };
+            var lightSwitchLabel = new Label
+            {
+                Text = "Bulb",
+                HorizontalOptions = LayoutOptions.StartAndExpand,
+                FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label))
+            };
+            var readButton = new Button { Text = "Read", HorizontalOptions = LayoutOptions.FillAndExpand };
+            var writeButton = new Button { Text = "Write", HorizontalOptions = LayoutOptions.FillAndExpand };
+            var netduinoIp = new Entry { Placeholder = "127.0.0.1", Keyboard = Keyboard.Telephone };
+
             MainPage = new ContentPage
             {
                 Content = new StackLayout
                 {
-                    VerticalOptions = LayoutOptions.Center,
                     Children = {
 						new Label {
-							XAlign = TextAlignment.Center,
-							Text = "Welcome to Xamarin Forms!"
-						}
+							Text = "IP del Netduino",
+                            //FontSize = Font.SystemFontOfSize(NamedSize.Medium)
+						},
+                        netduinoIp,
+                        new StackLayout{
+                            Orientation = StackOrientation.Horizontal,
+                            Children ={ readButton, writeButton }
+                        },
+                        new StackLayout{
+                            Orientation = StackOrientation.Horizontal,
+                            Children = {
+                                lightSwitchLabel,
+                                lightSwitch
+                            }
+                        }
 					}
                 }
             };
