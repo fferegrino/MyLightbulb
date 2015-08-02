@@ -8,10 +8,16 @@ namespace MyLightbulb.Plus3
 {
     public class LightbulbInterface
     {
-        public delegate void DataReceived(object sender, DataReceivedEventArgs args);
+        public delegate void BooleanInteraction(object sender, BooleanEventArgs args);
 
-        public DataReceived OnDataReceived;
+        public BooleanInteraction OnLampStatusChangeRequest;
 
+        public BooleanInteraction OnLampStateRequest;
+
+        const byte ReadLampState = (byte)'R';
+        const byte WriteLampState = (byte)'W';
+        const byte ByteTrue = (byte)'T';
+        const byte ByteFalse = (byte)'F';
 
         private Thread serverThread;
 
@@ -35,14 +41,28 @@ namespace MyLightbulb.Plus3
             {
                 servidor.Bind(new IPEndPoint(IPAddress.Any, Port));
                 servidor.Listen(1);
+                byte[] data = new byte[2];
                 while (true)
                 {
                     using (Socket newSocket = servidor.Accept())
                     {
-                        Debug.Print("Accepted");
-                        if (OnDataReceived != null)
+                        newSocket.Receive(data, 0, 2, SocketFlags.None);
+                        if (((char)data[0]) == WriteLampState)
                         {
-                            OnDataReceived(this, new DataReceivedEventArgs('A'));
+                            if (OnLampStatusChangeRequest != null)
+                            {
+                                OnLampStatusChangeRequest(this, new BooleanEventArgs(((char)data[1]) == ByteTrue));
+                            }
+                        }
+                        else if (((char)data[0]) == ReadLampState)
+                        {
+                            var args = new BooleanEventArgs(false);
+                            if (OnLampStateRequest != null)
+                            {
+                                OnLampStateRequest(this, args);
+                            }
+                            data[0] = args.Data ? ByteTrue : ByteFalse;
+                            newSocket.Send(data, 0, 1, SocketFlags.None);
                         }
                     }
                 }
@@ -67,10 +87,10 @@ namespace MyLightbulb.Plus3
     }
 
 
-    public class DataReceivedEventArgs : EventArgs
+    public class BooleanEventArgs : EventArgs
     {
-        public char Data { get; private set; }
-        public DataReceivedEventArgs(char data)
+        public bool Data { get; set; }
+        public BooleanEventArgs(bool data)
         {
             Data = data;
         }

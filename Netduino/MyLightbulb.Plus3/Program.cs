@@ -22,8 +22,9 @@ namespace MyLightbulb.Plus3
             NI.EnableStaticIP("192.168.0.75", "255.255.255.0", "192.168.0.1");
             Debug.Print(NI.IPAddress.ToString());
 
-            LightbulbInterface l = new LightbulbInterface(3212);
-            l.OnDataReceived += (s, a) => { led.Write(!led.Read()); };
+            LightbulbInterface l = new LightbulbInterface(5436);
+            l.OnLampStatusChangeRequest += (s, a) => { led.Write(a.Data); };
+            l.OnLampStateRequest += (s, a) => { a.Data = led.Read(); };
             l.Start();
             Thread.Sleep(Timeout.Infinite);
 
