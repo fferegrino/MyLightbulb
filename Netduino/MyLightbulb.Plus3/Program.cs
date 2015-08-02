@@ -11,10 +11,21 @@ namespace MyLightbulb.Plus3
 {
     public class Program
     {
+        static OutputPort led;
+
         public static void Main()
         {
-            // write your code here
+            led = new OutputPort(Pins.GPIO_PIN_D8, false);
 
+            Microsoft.SPOT.Net.NetworkInformation.NetworkInterface NI = Microsoft.SPOT.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()[0];
+
+            NI.EnableStaticIP("192.168.0.75", "255.255.255.0", "192.168.0.1");
+            Debug.Print(NI.IPAddress.ToString());
+
+            LightbulbInterface l = new LightbulbInterface(3212);
+            l.OnDataReceived += (s, a) => { led.Write(!led.Read()); };
+            l.Start();
+            Thread.Sleep(Timeout.Infinite);
 
         }
 

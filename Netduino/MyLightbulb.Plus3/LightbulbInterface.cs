@@ -2,12 +2,16 @@ using System;
 using Microsoft.SPOT;
 using System.Net.Sockets;
 using System.Threading;
+using System.Net;
 
 namespace MyLightbulb.Plus3
 {
     public class LightbulbInterface
     {
         public delegate void DataReceived(object sender, DataReceivedEventArgs args);
+
+        public DataReceived OnDataReceived;
+
 
         private Thread serverThread;
 
@@ -26,9 +30,22 @@ namespace MyLightbulb.Plus3
 
         private void StartServer()
         {
+
             using (Socket servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
-
+                servidor.Bind(new IPEndPoint(IPAddress.Any, Port));
+                servidor.Listen(1);
+                while (true)
+                {
+                    using (Socket newSocket = servidor.Accept())
+                    {
+                        Debug.Print("Accepted");
+                        if (OnDataReceived != null)
+                        {
+                            OnDataReceived(this, new DataReceivedEventArgs('A'));
+                        }
+                    }
+                }
             }
         }
 
@@ -39,7 +56,7 @@ namespace MyLightbulb.Plus3
             {
                 serverThread.Start();
                 IsRunning = true;
-                Debug.Print("Started server in thread " + serverThread.GetHashCode().ToString());
+                Debug.Print("Started server");
             }
             catch
             {
