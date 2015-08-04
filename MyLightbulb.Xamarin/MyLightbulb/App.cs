@@ -1,8 +1,8 @@
-﻿using System;
+﻿using MyLightbulb.Controls;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using Xamarin.Forms;
 
 namespace MyLightbulb
@@ -24,7 +24,7 @@ namespace MyLightbulb
 
             LightbulbInterface li = new LightbulbInterface("192.168.0.75", 5436);
 
-            var readButton = new Button { Text = "Read", HorizontalOptions = LayoutOptions.FillAndExpand  };
+            var readButton = new Button { Image = "on.png", VerticalOptions = LayoutOptions.StartAndExpand, HeightRequest = 240 };
             toggleEnabled = true;
             lightSwitch.Toggled += (s, a) =>
             {
@@ -34,7 +34,8 @@ namespace MyLightbulb
                 }
             };
 
-            readButton.Clicked += async (s, a) => {
+            readButton.Clicked += async (s, a) =>
+            {
                 toggleEnabled = false;
 
                 lightSwitch.IsToggled = await li.GetLampstatus();
@@ -54,18 +55,7 @@ namespace MyLightbulb
                             //FontSize = Font.SystemFontOfSize(NamedSize.Medium)
 						},
                         netduinoIp,
-                        //new StackLayout{
-                        //    Orientation = StackOrientation.Horizontal,
-                        //    Children ={ readButton, writeButton }
-                        //},
-                        readButton,
-                        new StackLayout{
-                            Orientation = StackOrientation.Horizontal,
-                            Children = {
-                                lightSwitchLabel,
-                                lightSwitch
-                            }
-                        }
+                        new LightbulbToggleButton(){ ImageOn="on.png"}
 					}
                 }
             };
