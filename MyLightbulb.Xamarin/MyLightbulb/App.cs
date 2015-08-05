@@ -1,5 +1,4 @@
-﻿using MyLightbulb.Controls;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,55 +9,81 @@ namespace MyLightbulb
     public class App : Application
     {
         static bool toggleEnabled;
+        static Entry netduinoIpEntry;
+        static Entry netduinoPortEntry;
         static Switch lightSwitch;
         public App()
         {
-            lightSwitch = new Switch { };
-            //var lightSwitch = new Button { Text = "On / Off" };
-            var lightSwitchLabel = new Label
-            {
-                Text = "Bulb",
-                HorizontalOptions = LayoutOptions.StartAndExpand,
-                FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label))
-            };
 
-            LightbulbInterface li = new LightbulbInterface("192.168.0.75", 5436);
-
-            var readButton = new Button { Image = "on.png", VerticalOptions = LayoutOptions.StartAndExpand, HeightRequest = 240 };
             toggleEnabled = true;
+
+            lightSwitch = new Switch
+            {
+                //RotationX = 90,
+                Scale = 2,
+                VerticalOptions = LayoutOptions.CenterAndExpand,
+                HorizontalOptions = LayoutOptions.CenterAndExpand
+            };
             lightSwitch.Toggled += (s, a) =>
             {
                 if (toggleEnabled)
                 {
+                    LightbulbInterface li = new LightbulbInterface(netduinoIpEntry.Text, Int32.Parse(netduinoPortEntry.Text));
                     li.SetLampStatus(lightSwitch.IsToggled);
                 }
             };
 
-            readButton.Clicked += async (s, a) =>
+
+            netduinoIpEntry = new Entry
+            {
+#if DEBUG
+                // Hardcoded for testing purposes
+                Text = "192.168.0.75",
+#endif
+                Placeholder = "127.0.0.1",
+                Keyboard = Keyboard.Telephone
+            };
+            netduinoPortEntry = new Entry
+            {
+#if DEBUG
+                // Hardcoded for testing purposes
+                Text = "5436",
+#endif
+                Placeholder = "1234",
+                Keyboard = Keyboard.Numeric
+            };
+
+            var refreshToobarButton = new ToolbarItem { Text = "Refresh" };
+            refreshToobarButton.Clicked += async (s, a) =>
             {
                 toggleEnabled = false;
-
+                LightbulbInterface li = new LightbulbInterface(netduinoIpEntry.Text, Int32.Parse(netduinoPortEntry.Text));
                 lightSwitch.IsToggled = await li.GetLampstatus();
-
                 toggleEnabled = true;
             };
 
-            var netduinoIp = new Entry { Placeholder = "127.0.0.1", Keyboard = Keyboard.Telephone };
 
-            MainPage = new ContentPage
+            MainPage = new NavigationPage(new ContentPage()
             {
+                ToolbarItems =
+                {
+                    refreshToobarButton
+                },
                 Content = new StackLayout
                 {
                     Children = {
 						new Label {
-							Text = "IP del Netduino",
-                            //FontSize = Font.SystemFontOfSize(NamedSize.Medium)
+							Text = "Netduino's IP"
 						},
-                        netduinoIp,
-                        new LightbulbToggleButton(){ ImageOn="on.png"}
+                        netduinoIpEntry,
+						new Label {
+							Text = "Netduino's port"
+						},
+                        netduinoPortEntry,
+                        lightSwitch
 					}
                 }
-            };
+            });
         }
 
 
