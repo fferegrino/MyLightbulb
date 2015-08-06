@@ -29,7 +29,7 @@ namespace MyLightbulb
                 if (toggleEnabled)
                 {
                     LightbulbInterface li = new LightbulbInterface(netduinoIpEntry.Text, Int32.Parse(netduinoPortEntry.Text));
-                    li.SetLampStatus(lightSwitch.IsToggled);
+                    li.SetLightSwitchStatus(lightSwitch.IsToggled);
                 }
             };
 
@@ -58,7 +58,7 @@ namespace MyLightbulb
             {
                 toggleEnabled = false;
                 LightbulbInterface li = new LightbulbInterface(netduinoIpEntry.Text, Int32.Parse(netduinoPortEntry.Text));
-                lightSwitch.IsToggled = await li.GetLampstatus();
+                lightSwitch.IsToggled = await li.GetLightSwitchStatus();
                 toggleEnabled = true;
             };
 
