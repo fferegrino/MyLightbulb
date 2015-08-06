@@ -8,16 +8,17 @@ namespace MyLightbulb.Plus3
 {
     public class LightbulbInterface
     {
+        const byte ReadLightSwitchState = (byte)'R';
+        const byte WriteLightSwitchState = (byte)'W';
+        const byte ByteTrue = (byte)'T';
+        const byte ByteFalse = (byte)'F';
+
         public delegate void BooleanInteraction(object sender, BooleanEventArgs args);
 
         public BooleanInteraction OnLampStatusChangeRequest;
 
         public BooleanInteraction OnLampStateRequest;
 
-        const byte ReadLampState = (byte)'R';
-        const byte WriteLampState = (byte)'W';
-        const byte ByteTrue = (byte)'T';
-        const byte ByteFalse = (byte)'F';
 
         private Thread serverThread;
 
@@ -27,6 +28,10 @@ namespace MyLightbulb.Plus3
 
         public bool IsRunning { get; private set; }
 
+        /// <summary>
+        /// The port in which the server will be listening to
+        /// </summary>
+        /// <param name="port"></param>
         public LightbulbInterface(int port)
         {
             Port = port;
@@ -47,18 +52,19 @@ namespace MyLightbulb.Plus3
                     using (Socket newSocket = servidor.Accept())
                     {
                         newSocket.Receive(data, 0, 2, SocketFlags.None);
-                        if (((char)data[0]) == WriteLampState)
+                        if (((char)data[0]) == WriteLightSwitchState)
                         {
                             if (OnLampStatusChangeRequest != null)
                             {
                                 OnLampStatusChangeRequest(this, new BooleanEventArgs(((char)data[1]) == ByteTrue));
                             }
                         }
-                        else if (((char)data[0]) == ReadLampState)
+                        else if (((char)data[0]) == ReadLightSwitchState)
                         {
                             var args = new BooleanEventArgs(false);
                             if (OnLampStateRequest != null)
                             {
+                                // Using the delegate we should tell the app whether the switch is on or off
                                 OnLampStateRequest(this, args);
                             }
                             data[0] = args.Data ? ByteTrue : ByteFalse;
@@ -71,12 +77,11 @@ namespace MyLightbulb.Plus3
 
         public bool Start()
         {
-            // start server           
+            // Start server           
             try
             {
                 serverThread.Start();
                 IsRunning = true;
-                Debug.Print("Started server");
             }
             catch
             {
@@ -86,7 +91,9 @@ namespace MyLightbulb.Plus3
         }
     }
 
-
+    /// <summary>
+    /// Simple event args class to handle the outgoing/incoming data from the client
+    /// </summary>
     public class BooleanEventArgs : EventArgs
     {
         public bool Data { get; set; }
